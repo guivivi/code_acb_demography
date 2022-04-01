@@ -1,0 +1,133 @@
+---
+title: "Basketball. ACB league. 2020-2021"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    source_code: embed
+    navbar:
+        - { icon: "fa-book", href: "https://www.uv.es/vivigui/", align: right, target: _blank}
+        - { icon: "fa-github", href: "https://github.com/guivivi", align: right, target: _blank}
+---
+
+<style>
+.chart-title {
+  font-size: 22px;
+}
+body {
+  font-size: 18px;
+}
+.nav-tabs-custom .nav-tabs li.active a {
+  font-size: 22px;
+}
+.nav-tabs-custom .nav-tabs li:not(.active) a {
+  font-size: 22px;
+}
+</style>
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(readr)
+library(crosstalk)
+library(DT)
+library(plotly)
+```
+
+```{r data, include=FALSE}
+df0_stats <- read_csv("output/acb_2021_stats_players.csv")
+df0_stats <- SharedData$new(df0_stats)
+
+df0_info <- read_csv("output/acb_2021_info_players.csv")
+df0_info <- SharedData$new(df0_info)
+```
+
+Results
+===================================== 
+
+Inputs {.sidebar data-width=350}
+-------------------------------------------------------------------------
+
+<br>
+
+```{r menus}
+filter_checkbox("Nationality", "Choose nationality", df0_stats, ~Nationality)
+filter_select("Team", "Choose team", df0_stats, ~Team)
+```
+
+Column {data-width=500} {.tabset}
+-----------------------------------------------------------------------
+
+### Games
+
+```{r games}
+datatable(df0_stats,           
+          class = "compact cell-border",
+          rownames = FALSE,
+          filter = "top",
+          extensions = "FixedColumns",
+          options = list(dom = '<top i>', order = list(1, "desc"),
+                         autoWidth = FALSE, fixedColumns = list(leftColumns = 2),
+                         lengthMenu = c(5,10),
+                         pageLength = 10))
+```
+
+### Visual comparison
+
+```{r plot}
+p1 <- df0_stats %>%
+  plot_ly(x = ~MP, y = ~PTS, color = ~Team, text = ~Player, type = "scatter", height = 300,
+          marker = list(size = 10)) %>%
+  config(displayModeBar = FALSE) %>%
+  layout(hoverlabel = list(font = list(size = 20)))
+
+p2 <- df0_stats %>%
+  plot_ly(x = ~MP, y = ~PIR, color = ~Team, text = ~Player, type = "scatter", height = 300,
+          marker = list(size = 10)) %>%
+  config(displayModeBar = FALSE) %>%
+  layout(hoverlabel = list(font = list(size = 20)))
+
+p3 <- df0_stats %>%
+  plot_ly(x = ~MP, y = ~PFrv, color = ~Team, text = ~Player, type = "scatter", height = 300,
+          marker = list(size = 10)) %>%
+  config(displayModeBar = FALSE) %>%
+  layout(hoverlabel = list(font = list(size = 20)))
+
+bscols(p1, p2, p3, widths = c(12, 6, 6))
+```
+
+### Players
+
+```{r players}
+datatable(df0_info,           
+          class = "compact cell-border",
+          escape = FALSE,
+          rownames = FALSE,
+          filter = "top",
+          options = list(order = list(1, "desc"),
+                         autoWidth = FALSE,
+                         lengthMenu = c(5,10),
+                         pageLength = 10))
+```
+
+About
+===================================== 
+
+<br>
+
+**INTRODUCTION:**
+
+This dashboard is attached to the paper *Imbalance between national and international players in Spanish basketball. A data analytics perspective*. It allows to visualize the games and players' data from the 2020-2021 regular season of the Spanish ACB league. $355$ unique players and $19$ teams participated in this season.
+
+The dashboard consists of two main menus and two panels. The menus allow the user to choose between nationalities (foreigner and Spaniard) with a checkbox menu, and between teams with a dropdown menu. In both cases, multiple selections is possible.
+
+The 'Player' column is fixed while scrolling right.
+
+<br>
+
+**SOFTWARE:**
+
+This dashboard has been created with the R package *flexdashboard*.
+
+[1] R Core Team (2020). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing, Vienna, Austria, [https://www.R-project.org/](https://www.R-project.org/){target="_blank"}
+
+[2] Iannone, R., Allaire, JJ. and Borges, B. (2020). *flexdashboard: R Markdown Format for Flexible Dashboards*. R package version 0.5.2, [https://CRAN.R-project.org/package=flexdashboard](https://CRAN.R-project.org/package=flexdashboard){target="_blank"}
